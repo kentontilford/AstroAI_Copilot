@@ -1,51 +1,5 @@
 {
-  "version": 2,
-  "framework": "nextjs",
-  "buildCommand": "npm run validate-env && npm run build",
-  "installCommand": "npm ci",
-  "regions": ["iad1"],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection", 
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "origin-when-cross-origin"
-        },
-        {
-          "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=(self), interest-cohort=()"
-        }
-      ]
-    }
-  ],
   "env": {
-    "NEXT_PUBLIC_APP_URL": {
-      "type": "string"
-    },
-    "NODE_ENV": "production",
-    "NEXT_PRIVATE_STANDALONE": "true"
-  },
-  "crons": [
-    {
-      "path": "/api/cron/daily-cleanup",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/refresh-cache",
-      "schedule": "0 */6 * * *"
-    }
-  ]
+    "NEXT_PUBLIC_APP_URL": "https://astro-ai-copilot.vercel.app"
+  }
 }
