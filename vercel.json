@@ -2,6 +2,6 @@
   "env": {
     "NEXT_PUBLIC_APP_URL": "https://astro-ai-copilot.vercel.app"
   },
-  "buildCommand": "npm install --no-package-lock && npm run build",
-  "installCommand": "npm install --no-package-lock"
+  "buildCommand": "pip install setuptools && npm install --no-package-lock --omit=optional --no-optional && npm run build",
+  "installCommand": "apt-get update && apt-get install -y python3-distutils python3-dev && npm install --no-package-lock --omit=optional --no-optional"
 }
