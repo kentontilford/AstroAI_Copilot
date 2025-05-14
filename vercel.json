@@ -1,5 +1,7 @@
 {
   "env": {
     "NEXT_PUBLIC_APP_URL": "https://astro-ai-copilot.vercel.app"
-  }
+  },
+  "buildCommand": "npm install --legacy-peer-deps && npx prisma generate && next build",
+  "installCommand": "npm install --legacy-peer-deps"
 }
