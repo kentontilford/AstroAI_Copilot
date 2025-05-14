@@ -6,6 +6,14 @@ const nextConfig = {
   compress: true,
   swcMinify: true,
   
+  // Enable TypeScript path aliases (@/component/...)
+  experimental: {
+    appDir: true,
+  },
+  
+  // Use standalone output for containerized deployment
+  output: 'standalone',
+  
   images: {
     domains: [
       'images.clerk.dev', // For Clerk user images
