@@ -1,0 +1,217 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Subscription status enum
+enum SubscriptionStatus {
+  TRIALING        // Initial 14-day trial
+  ACTIVE          // Paid subscription
+  LAPSED          // Subscription ended 
+  CANCELLED       // User-cancelled subscription
+  FREE_TIER_POST_TRIAL // Limited access after trial
+}
+
+// User role enum
+enum UserRole {
+  user            // Regular user
+  admin           // Administrator
+  moderator       // Content moderator
+  support         // Customer support
+}
+
+// Dashboard type enum
+enum DashboardType {
+  PERSONAL_GROWTH
+  RELATIONSHIPS
+}
+
+// User model 
+model User {
+  id                              Int                @id @default(autoincrement())
+  clerk_user_id                   String             @unique // Auth provider user ID
+  email                           String             @unique
+  first_name                      String?
+  last_name                       String?
+  profile_image_url               String?
+  
+  // Subscription fields
+  subscription_status             SubscriptionStatus @default(TRIALING)
+  trial_ends_at                   DateTime?
+  stripe_customer_id              String?
+  stripe_subscription_id          String?
+  current_subscription_period_end DateTime?
+  
+  // Authorization
+  role                            UserRole           @default(user)
+  is_verified                     Boolean            @default(false)
+  
+  // Defaults 
+  default_solo_profile_id         Int?
+  default_relationship_profile_a_id Int?
+  default_relationship_profile_b_id Int?
+  
+  // Timestamps
+  created_at                      DateTime           @default(now())
+  updated_at                      DateTime           @default(now()) @updatedAt
+  deleted_at                      DateTime?
+  
+  // Relationships
+  birth_profiles                  BirthProfile[]
+  chat_threads                    ChatThread[]
+  default_solo_profile            BirthProfile?      @relation("DefaultSoloProfile", fields: [default_solo_profile_id], references: [id])
+  default_relationship_profile_a  BirthProfile?      @relation("DefaultRelationshipProfileA", fields: [default_relationship_profile_a_id], references: [id])
+  default_relationship_profile_b  BirthProfile?      @relation("DefaultRelationshipProfileB", fields: [default_relationship_profile_b_id], references: [id])
+  permissions                     UserPermission[]
+  sessions                        UserSession[]
+  audit_logs                      AuditLog[]
+  
+  @@index([clerk_user_id])
+  @@index([email])
+  @@index([subscription_status])
+  @@index([role])
+  @@index([created_at])
+  @@index([deleted_at])
+}
+
+// Birth profile model for storing astrological data
+model BirthProfile {
+  id                              Int       @id @default(autoincrement())
+  user_clerk_id                   String
+  profile_name                    String
+  date_of_birth                   String
+  time_of_birth                   String?
+  place_of_birth                  String?
+  latitude                        Float?
+  longitude                       Float?
+  
+  // Timestamps
+  created_at                      DateTime  @default(now())
+  updated_at                      DateTime  @default(now()) @updatedAt
+  deleted_at                      DateTime?
+  
+  // Relationships
+  user                            User      @relation(fields: [user_clerk_id], references: [clerk_user_id])
+  default_solo_for                User[]    @relation("DefaultSoloProfile")
+  default_relationship_a_for      User[]    @relation("DefaultRelationshipProfileA")
+  default_relationship_b_for      User[]    @relation("DefaultRelationshipProfileB")
+  
+  @@index([user_clerk_id])
+  @@index([created_at])
+  @@index([deleted_at])
+}
+
+// Chat thread model
+model ChatThread {
+  id                              Int          @id @default(autoincrement())
+  user_clerk_id                   String
+  openai_thread_id                String
+  title                           String
+  active_dashboard_context        DashboardType?
+  
+  // Timestamps
+  created_at                      DateTime     @default(now())
+  updated_at                      DateTime     @default(now()) @updatedAt
+  last_message_at                 DateTime     @default(now())
+  deleted_at                      DateTime?
+  
+  // Relationships
+  user                            User         @relation(fields: [user_clerk_id], references: [clerk_user_id])
+  messages                        ChatMessage[]
+  
+  @@index([user_clerk_id])
+  @@index([openai_thread_id])
+  @@index([last_message_at])
+  @@index([deleted_at])
+}
+
+// Chat message model
+model ChatMessage {
+  id                              Int        @id @default(autoincrement())
+  thread_id                       Int
+  role                            String     // "user" or "assistant"
+  content                         String
+  
+  // Timestamps
+  created_at                      DateTime   @default(now())
+  deleted_at                      DateTime?
+  
+  // Relationships
+  thread                          ChatThread @relation(fields: [thread_id], references: [id])
+  
+  @@index([thread_id])
+  @@index([role])
+  @@index([created_at])
+  @@index([deleted_at])
+}
+
+// Custom user permissions
+model UserPermission {
+  id                              Int        @id @default(autoincrement())
+  user_clerk_id                   String
+  permission                      String
+  granted_at                      DateTime   @default(now())
+  granted_by                      String?
+  expires_at                      DateTime?
+  
+  // Timestamps
+  created_at                      DateTime   @default(now())
+  updated_at                      DateTime   @default(now()) @updatedAt
+  deleted_at                      DateTime?
+  
+  // Relationships
+  user                            User       @relation(fields: [user_clerk_id], references: [clerk_user_id], onDelete: Cascade)
+  
+  @@unique([user_clerk_id, permission], name: "unique_user_permission", map: "UserPermission_user_clerk_id_permission_key")
+  @@index([permission])
+  @@index([created_at])
+  @@index([deleted_at])
+}
+
+// User session tracking
+model UserSession {
+  id                              Int        @id @default(autoincrement())
+  user_clerk_id                   String
+  session_id                      String     @unique
+  ip_address                      String?
+  user_agent                      String?
+  last_active                     DateTime   @default(now())
+  created_at                      DateTime   @default(now())
+  expires_at                      DateTime
+  revoked_at                      DateTime?
+  revoked_reason                  String?
+  
+  // Relationships
+  user                            User       @relation(fields: [user_clerk_id], references: [clerk_user_id], onDelete: Cascade)
+  
+  @@index([user_clerk_id, last_active])
+  @@index([created_at])
+  @@index([expires_at])
+}
+
+// Audit log for security events
+model AuditLog {
+  id                              Int        @id @default(autoincrement())
+  user_clerk_id                   String?
+  event_type                      String
+  resource_type                   String?
+  resource_id                     String?
+  ip_address                      String?
+  user_agent                      String?
+  details                         Json?
+  created_at                      DateTime   @default(now())
+  
+  // Relationships
+  user                            User?      @relation(fields: [user_clerk_id], references: [clerk_user_id], onDelete: SetNull)
+  
+  @@index([event_type, created_at])
+  @@index([user_clerk_id, created_at])
+  @@index([resource_type, resource_id])
+}

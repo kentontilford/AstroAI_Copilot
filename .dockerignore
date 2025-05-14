@@ -1,0 +1,55 @@
+# Git
+.git
+.gitignore
+.github
+*.md
+!README.md
+!DEPLOYMENT.md
+
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# Builds
+.next
+out
+dist
+coverage
+.turbo
+
+# Environment (never include env files in Docker)
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Testing
+coverage
+__tests__
+jest.config.js
+jest.setup.js
+
+# Development files
+.vscode
+.idea
+.DS_Store
+*.log
+*.swp
+*.swo
+
+# Large files
+*.psd
+*.ai
+*.tif
+*.tiff
+
+# Backups
+backups/
+
+# Cache
+.cache
+.eslintcache
+.stylelintcache
+.vercel
