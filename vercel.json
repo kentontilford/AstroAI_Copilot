@@ -3,5 +3,6 @@
     "NEXT_PUBLIC_APP_URL": "https://astro-ai-copilot.vercel.app"
   },
   "buildCommand": "npm install --no-package-lock --omit=optional && npm run build",
-  "installCommand": "npm install --no-package-lock --omit=optional"
+  "installCommand": "npm install --no-package-lock --omit=optional",
+  "framework": "nextjs"
 }
