@@ -23,8 +23,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
-.env*.local
 .env
+.env*.local
+.env.production
+.env.development
 
 # vercel
 .vercel
@@ -36,7 +38,22 @@ next-env.d.ts
 # Prisma
 /prisma/migrations.env.production
 
-# Sensitive files
-.env
-.env.local
-.env.production
+# Railway
+/railway.json
+/railway.toml
+.railway/
+
+# Logs
+/logs
+*.log
+
+# Certificates and keys
+*.key
+*.pem
+*.crt
+*.ca-bundle
+
+# Sensitive credentials
+*.p8
+oauth-*.json
+service-account-*.json
