@@ -5,6 +5,12 @@
 :root {
   --foreground-rgb: 240, 240, 240;
   --background-rgb: 18, 18, 31;
+  --cosmic-black: 18, 18, 31;
+  --cosmic-ink: 28, 28, 45;
+  --nebula-veil: 38, 38, 55;
+  --stardust-silver: 170, 170, 190;
+  --starlight-white: 240, 240, 240;
+  --supernova-teal: 64, 223, 219;
 }
 
 body {
@@ -28,7 +34,7 @@ body {
   }
   
   .card {
-    @apply bg-nebula-veil rounded-lg p-4 shadow-lg;
+    @apply bg-nebula-veil rounded-lg p-4 shadow-lg border border-stardust-silver border-opacity-10;
   }
   
   .input-field {
