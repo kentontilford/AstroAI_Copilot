@@ -33,14 +33,16 @@ const requiredVariables = [
   
   // Database
   'DATABASE_URL',
-  
-  // App Settings
-  'NEXT_PUBLIC_APP_URL',
 ];
 
 // Variables required only in production
 const productionVariables = [
   'NODE_ENV',
+];
+
+// Optional variables that should be valid if present
+const optionalVariables = [
+  'NEXT_PUBLIC_APP_URL',
 ];
 
 // Load environment variables from file
@@ -83,10 +85,12 @@ if (missingVariables.length > 0) {
     console.warn('\x1b[33m%s\x1b[0m', '⚠️ Warning: DATABASE_URL should start with postgresql://');
   }
   
-  // Verify app URL format
+  // Verify app URL format only if it's provided
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-  if (isProduction && !appUrl.startsWith('https://')) {
+  if (appUrl && isProduction && !appUrl.startsWith('https://')) {
     console.warn('\x1b[33m%s\x1b[0m', '⚠️ Warning: In production, NEXT_PUBLIC_APP_URL should use HTTPS');
+  } else if (!appUrl) {
+    console.warn('\x1b[33m%s\x1b[0m', '⚠️ NEXT_PUBLIC_APP_URL is not set. Some features may not work correctly.');
   }
   
   console.log('\x1b[32m%s\x1b[0m', 'The application is ready to start!');

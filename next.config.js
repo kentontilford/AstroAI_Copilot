@@ -18,6 +18,11 @@ const nextConfig = {
   
   // Add Content Security Policy in production
   headers: async () => {
+    // Get the app domain from environment or use a default
+    const appDomain = (process.env.NEXT_PUBLIC_APP_URL || 'https://app.example.com')
+      .replace('https://', '')
+      .replace('http://', '');
+      
     return [
       {
         source: '/(.*)',
@@ -52,11 +57,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://maps.googleapis.com https://clerk.astrology-ai-copilot.com;
+              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://maps.googleapis.com https://*.clerk.accounts.dev;
               style-src 'self' 'unsafe-inline';
               img-src 'self' data: https://img.clerk.com https://images.clerk.dev;
               font-src 'self';
-              connect-src 'self' https://api.openai.com https://api.stripe.com https://clerk.astrology-ai-copilot.com https://maps.googleapis.com;
+              connect-src 'self' https://api.openai.com https://api.stripe.com https://*.clerk.accounts.dev https://maps.googleapis.com;
               frame-src 'self' https://js.stripe.com;
               object-src 'none';
             `.replace(/\s{2,}/g, ' ').trim()
@@ -65,11 +70,11 @@ const nextConfig = {
             key: 'Content-Security-Policy-Report-Only',
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://maps.googleapis.com https://clerk.astrology-ai-copilot.com;
+              script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://maps.googleapis.com https://*.clerk.accounts.dev;
               style-src 'self' 'unsafe-inline';
               img-src 'self' data: https://img.clerk.com https://images.clerk.dev;
               font-src 'self';
-              connect-src 'self' https://api.openai.com https://api.stripe.com https://clerk.astrology-ai-copilot.com https://maps.googleapis.com;
+              connect-src 'self' https://api.openai.com https://api.stripe.com https://*.clerk.accounts.dev https://maps.googleapis.com;
               frame-src 'self' https://js.stripe.com;
               object-src 'none';
             `.replace(/\s{2,}/g, ' ').trim()
@@ -89,7 +94,7 @@ const nextConfig = {
       },
       {
         source: '/login',
-        destination: '/log-in',
+        destination: '/sign-in',
         permanent: true,
       },
     ]
