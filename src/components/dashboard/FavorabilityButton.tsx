@@ -2,138 +2,76 @@
 
 import { useState } from 'react';
 
-type FavorabilityButtonProps = {
+interface FavorabilityButtonProps {
   label: string;
-  rating: number;
+  rating: number; // 0-10
   explanation?: string;
   isLoading?: boolean;
-};
+}
 
 export default function FavorabilityButton({
   label,
   rating,
   explanation,
-  isLoading = false,
+  isLoading = false
 }: FavorabilityButtonProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
-  // Get color based on rating
-  const getRatingColor = (rating: number) => {
-    switch (rating) {
-      case 1:
-        return 'bg-red-600';
-      case 2:
-        return 'bg-orange-500';
-      case 3:
-        return 'bg-yellow-500';
-      case 4:
-        return 'bg-green-500';
-      case 5:
-        return 'bg-supernova-teal';
-      default:
-        return 'bg-stardust-silver';
-    }
+  // Determine color based on rating
+  const getButtonColor = () => {
+    if (isLoading) return 'bg-stardust-silver bg-opacity-20';
+    if (rating >= 8) return 'bg-emerald-500'; // Excellent
+    if (rating >= 6) return 'bg-green-600'; // Good
+    if (rating >= 4) return 'bg-yellow-600'; // Neutral
+    if (rating >= 2) return 'bg-orange-600'; // Challenging
+    return 'bg-red-600'; // Difficult
   };
 
-  const handleClick = () => {
-    if (explanation) {
-      setIsModalOpen(true);
-    }
+  // Format rating for display (add a + for high ratings)
+  const formatRating = () => {
+    if (isLoading) return '';
+    if (rating >= 9) return '10';
+    if (rating >= 8) return '8+';
+    if (rating >= 6) return '6+';
+    if (rating >= 4) return '4+';
+    if (rating >= 2) return '2+';
+    return '1';
   };
 
   return (
-    <>
+    <div className="relative">
       <button
-        onClick={handleClick}
-        disabled={isLoading || !explanation}
-        className={`flex flex-col items-center p-3 rounded-lg bg-nebula-veil hover:bg-opacity-80 transition-colors ${
-          !explanation ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
-        } ${isLoading ? 'animate-pulse' : ''}`}
+        className={`w-full py-2 px-3 rounded-lg text-starlight-white font-medium flex justify-between items-center ${getButtonColor()} hover:opacity-90 transition-opacity`}
+        onMouseEnter={() => explanation && setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        onClick={() => explanation && setShowTooltip(!showTooltip)}
       >
-        {isLoading ? (
-          <>
-            <div className="h-4 bg-dark-space rounded w-3/4 mb-3"></div>
-            <div className="flex space-x-1 mb-2">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="w-4 h-4 bg-dark-space rounded-full"></div>
-              ))}
-            </div>
-          </>
-        ) : (
-          <>
-            <span className="text-sm mb-2">{label}</span>
-            <div className="flex space-x-1">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className={`w-3 h-3 rounded-full ${
-                    i <= rating ? getRatingColor(rating) : 'bg-dark-space'
-                  }`}
-                ></div>
-              ))}
-            </div>
-          </>
+        <span>{label}</span>
+        {!isLoading && (
+          <span className="ml-2 px-1.5 py-0.5 bg-opacity-20 bg-white rounded text-xs">
+            {formatRating()}
+          </span>
         )}
       </button>
 
-      {/* Explanation Modal */}
-      {isModalOpen && explanation && (
-        <div className="fixed inset-0 bg-dark-space bg-opacity-80 flex items-center justify-center z-50 p-4">
-          <div className="bg-nebula-veil rounded-lg shadow-xl max-w-lg w-full">
-            <div className="p-4 border-b border-stardust-silver border-opacity-20 flex justify-between items-center">
-              <h3 className="text-xl font-bold">{label} Favorability</h3>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-stardust-silver hover:text-starlight-white"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="flex justify-center mb-6">
-                <div className="flex space-x-2">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div
-                      key={i}
-                      className={`w-6 h-6 rounded-full ${
-                        i <= rating ? getRatingColor(rating) : 'bg-dark-space'
-                      }`}
-                    ></div>
-                  ))}
-                </div>
-              </div>
-              <div className="text-starlight-white">
-                {explanation.split('\n').map((paragraph, index) => (
-                  <p key={index} className={index > 0 ? 'mt-4' : ''}>
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-            </div>
-            <div className="p-4 border-t border-stardust-silver border-opacity-20 flex justify-end">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="btn-secondary"
-              >
-                Close
-              </button>
-            </div>
+      {/* Tooltip/Popover */}
+      {showTooltip && explanation && (
+        <div className="absolute z-10 bottom-full left-0 mb-2 w-64 bg-cosmic-ink border border-stardust-silver border-opacity-20 rounded-lg p-3 shadow-lg">
+          <div className="text-sm text-starlight-white">
+            <p className="font-medium mb-1">{label}: {formatRating()}/10</p>
+            <p className="text-stardust-silver">{explanation}</p>
           </div>
+          {/* Arrow */}
+          <div className="absolute bottom-0 left-4 transform translate-y-1/2 rotate-45 w-2 h-2 bg-cosmic-ink border-b border-r border-stardust-silver border-opacity-20"></div>
         </div>
       )}
-    </>
+
+      {/* Loading State Animation */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-5 h-5 border-2 border-stardust-silver border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
+    </div>
   );
 }
