@@ -1,12 +1,16 @@
 # Stage 1: Dependencies
 FROM node:18-alpine AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine for understanding dependencies
-RUN apk add --no-cache libc6-compat
+
+# Install build dependencies
+RUN apk add --no-cache libc6-compat python3 make g++
+
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json* ./
-RUN npm ci
+
+# Use npm install instead of npm ci for better compatibility
+RUN npm install
 
 # Stage 2: Builder
 FROM node:18-alpine AS builder
@@ -46,7 +50,7 @@ COPY --from=builder /app/prisma ./prisma
 
 # Install only production dependencies
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-RUN npm install --omit=dev
+RUN npm install --production --ignore-scripts
 
 # Create a script to run migrations and start the application
 RUN echo '#!/bin/sh\n\
